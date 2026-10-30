@@ -4,7 +4,7 @@
 Este projeto foi desenvolvido para a Mercattone, um e-commerce com cerca de 200 pedidos diários, com o objetivo de organizar o caos na caixa de entrada de atendimento. O fluxo utiliza um pipeline de análise baseado em nós especializados de IA (LLM Chains) que recebe o e-mail, analisa o conteúdo, deteta urgências, roteia a mensagem para o Slack e gera uma resposta automática.
 
 ### 2️⃣ Objetivo
-Automatizar a triagem de mensagens de clientes para garantir que bugs não se percam, que sugestões valiosas cheguem à equipa de produto e que urgências sejam tratadas a tempo. O foco é substituir a triagem manual demorada e sujeita a erros por um processo escalável, eficiente e determinístico.
+Automatizar a triagem de mensagens de clientes para garantir que bugs não se percam, que sugestões valiosas cheguem à equipe de produto e que urgências sejam tratadas a tempo. O foco é substituir a triagem manual demorada e sujeita a erros por um processo escalável, eficiente e determinístico.
 
 ### 3️⃣ Funcionalidades
 - Processamento autônomo disparado a cada novo e-mail recebido.
@@ -18,7 +18,7 @@ Automatizar a triagem de mensagens de clientes para garantir que bugs não se pe
 ### 4️⃣ Informações analisadas
 - O nível de urgência do feedback recebido.
 - Relatos de bugs que antes ficavam perdidos no meio de elogios.
-- Sugestões de melhorias invisíveis para a equipa de produto.
+- Sugestões de melhorias invisíveis para a equipe de produto.
 - O sentimento geral do cliente em relação ao e-commerce.
 
 ### 5️⃣ Tecnologias utilizadas
