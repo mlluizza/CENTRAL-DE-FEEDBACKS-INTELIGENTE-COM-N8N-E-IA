@@ -1,39 +1,52 @@
-# Central de Feedbacks Inteligente: Pipeline de Análise com IA
+# Pipeline de Análise com IA: Central de Feedbacks Inteligente
 
-## 📖 Sobre o Projeto
-A Mercattone é um e-commerce com cerca de 200 pedidos por dia. Todo o feedback dos clientes chega à mesma caixa de entrada, o que gera um caos:
-* **Bugs perdem-se:** Ficam enterrados entre elogios e não são tratados com prioridade.
-* **Sugestões desaparecem:** A equipa de produto nunca chega a conhecer as boas ideias dos clientes.
-* **Urgências chegam tarde:** A equipa de CX lê dezenas de e-mails por dia e, ainda assim, erra na triagem.
+### 1️⃣ Descrição do Projeto
+Este projeto foi desenvolvido para a Mercattone, um e-commerce com cerca de 200 pedidos diários, com o objetivo de organizar o caos na caixa de entrada de atendimento. O fluxo utiliza um pipeline de análise baseado em nós especializados de IA (LLM Chains) que recebe o e-mail, analisa o conteúdo, deteta urgências, roteia a mensagem para o Slack e gera uma resposta automática.
 
-Para resolver isto, criámos um **Pipeline de Análise com IA** baseado em 5 LLM Chains.
+### 2️⃣ Objetivo
+Automatizar a triagem de mensagens de clientes para garantir que bugs não se percam, que sugestões valiosas cheguem à equipa de produto e que urgências sejam tratadas a tempo. O foco é substituir a triagem manual demorada e sujeita a erros por um processo escalável, eficiente e determinístico.
 
-## 🚀 Como Funciona
-O sistema atua sozinho a cada e-mail recebido. Um e-mail entra e cinco ações saem, sem que ninguém precise de fazer nada:
-1. **E-mail chega**
-2. **IA analisa**
-3. **Deteta urgência**
-4. **Roteia no Slack**
-5. **Envia resposta automática**
+### 3️⃣ Funcionalidades
+- Processamento autônomo disparado a cada novo e-mail recebido.
+- Classificação de textos em categorias predefinidas utilizando o *Text Classifier*.
+- Extração de texto livre para dados estruturados (formato JSON) através do *Information Extractor*.
+- Deteção do tom da mensagem (positivo, neutro ou negativo) com o nó de *Sentiment Analysis*.
+- Criação de resumos precisos de mensagens longas com a *Summarization Chain*.
+- Roteamento inteligente de alertas críticos para a equipa diretamente no Slack.
+- Envio de respostas automáticas iniciais para os clientes.
 
-## 🧠 Porquê LLM Chains em vez de AI Agents?
-Embora os **AI Agents** sejam ótimos para conversas abertas e chatbots (são autónomos e usam *tools*), eles também são mais caros, consomem mais *tokens* e podem ser imprevisíveis.
+### 4️⃣ Informações analisadas
+- O nível de urgência do feedback recebido.
+- Relatos de bugs que antes ficavam perdidos no meio de elogios.
+- Sugestões de melhorias invisíveis para a equipa de produto.
+- O sentimento geral do cliente em relação ao e-commerce.
 
-Para um processamento em escala, optámos pelo mundo das **LLM Chains**. São nós especializados de IA onde cada um faz uma tarefa específica sem improvisar.
-* **Determinística:** Faz exatamente o que foi definido.
-* **Mais barata:** Consome menos *tokens* e tem mais eficiência.
-* **Mais previsível:** Entrega resultados consistentes.
-* **Pipeline de dados:** Perfeita para processar grandes volumes em escala.
+### 5️⃣ Tecnologias utilizadas
+- n8n (Múltiplos nós de LLM Chains baseados em previsibilidade)
+- Slack (Para recebimento de roteamentos e notificações)
+- Google Sheets (Planilha para registo estruturado dos dados)
+- E-mail (Entrada de dados)
 
-## ⚙️ As 5 LLM Chains (Os 5 Superpoderes)
-Cada nó resolve um problema específico. Juntos, formam o pipeline de análise completo:
-
-* **Information Extractor:** Transforma texto livre em dados estruturados (JSON).
-* **Sentiment Analysis:** Deteta o sentimento do cliente (positivo, neutro ou negativo).
-* **Text Classifier:** Classifica o feedback em categorias predefinidas.
-* **Summarization Chain:** Resume textos longos com precisão.
-* **Basic LLM Chain:** Chamada genérica com *prompt* livre para total flexibilidade.
+### 6️⃣ Benefícios da automação
+- Operação mais barata, consumindo menos tokens e com maior eficiência do que um *AI Agent* tradicional.
+- Resultados consistentes e previsíveis que não dependem da "improvisação" da IA a cada execução.
+- Fim do atraso na identificação de urgências, que antes ocorria porque a equipa de CX precisava de ler dezenas de mensagens manualmente por dia.
+- Geração de um pipeline robusto perfeitamente adequado para processamento de dados em larga escala.
 
 ### 📸 Demonstração do Projeto
 
 **Envio da Mensagem Automática no Slack:**
+<img width="1378" height="202" alt="Image" src="https://github.com/user-attachments/assets/adb6ac6a-a307-4ab1-9867-1b725ce74cac" />
+
+<img width="1377" height="201" alt="Image" src="https://github.com/user-attachments/assets/402e82fb-2cfc-4738-8639-fdf2c89fb1f7" />
+
+<img width="1390" height="157" alt="Image" src="https://github.com/user-attachments/assets/0df14f8d-60b6-4ad0-b90c-8ce615d3bea2" />
+
+**Envio da Mensagem Automática no E-mail**
+<img width="1127" height="274" alt="Image" src="https://github.com/user-attachments/assets/f3fa3082-6be6-413b-92f3-7aedaa674b10" />
+
+<img width="1597" height="665" alt="Image" src="https://github.com/user-attachments/assets/76c04361-5334-42fe-99ca-cdd0705b7c8d" />
+
+
+**Fluxo construído no n8n:**
+<img width="1535" height="514" alt="Image" src="https://github.com/user-attachments/assets/a270b50c-02d1-42a0-9165-92d78b3ce400" />
