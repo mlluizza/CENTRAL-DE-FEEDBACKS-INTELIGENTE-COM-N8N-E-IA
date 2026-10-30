@@ -59,7 +59,5 @@ Automatizar a triagem de mensagens de clientes para garantir que bugs não se pe
 **📊 Extração de Dados e Registo Estruturado (Google Sheets):**
 <br><br>
 <img width="1857" height="222" alt="Image" src="https://github.com/user-attachments/assets/cfcf1f77-aa4e-4cfa-86ad-c44332b612d1" />
-**Fluxo construído no n8n:**
-<br>
-<img width="1535" height="514" alt="Image" src="https://github.com/user-attachments/assets/a270b50c-02d1-42a0-9165-92d78b3ce400" />
+
 
