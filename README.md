@@ -35,18 +35,27 @@ Automatizar a triagem de mensagens de clientes para garantir que bugs não se pe
 
 ### 📸 Demonstração do Projeto
 
+### 📸 Demonstração do Projeto
+
 **Envio da Mensagem Automática no Slack:**
+<br>
 <img width="1378" height="202" alt="Image" src="https://github.com/user-attachments/assets/adb6ac6a-a307-4ab1-9867-1b725ce74cac" />
-
+<br>
 <img width="1377" height="201" alt="Image" src="https://github.com/user-attachments/assets/402e82fb-2cfc-4738-8639-fdf2c89fb1f7" />
-
+<br>
 <img width="1390" height="157" alt="Image" src="https://github.com/user-attachments/assets/0df14f8d-60b6-4ad0-b90c-8ce615d3bea2" />
 
-**Envio da Mensagem Automática no E-mail**
-<img width="1127" height="274" alt="Image" src="https://github.com/user-attachments/assets/f3fa3082-6be6-413b-92f3-7aedaa674b10" />
+**Registo Estruturado de Feedbacks (Google Sheets):**
+<br>
+<img width="1857" height="222" alt="Image" src="https://github.com/user-attachments/assets/cfcf1f77-aa4e-4cfa-86ad-c44332b612d1" />
 
+**Envio da Mensagem Automática no E-mail:**
+<br>
+<img width="1127" height="274" alt="Image" src="https://github.com/user-attachments/assets/f3fa3082-6be6-413b-92f3-7aedaa674b10" />
+<br>
 <img width="1597" height="665" alt="Image" src="https://github.com/user-attachments/assets/76c04361-5334-42fe-99ca-cdd0705b7c8d" />
 
-
 **Fluxo construído no n8n:**
+<br>
 <img width="1535" height="514" alt="Image" src="https://github.com/user-attachments/assets/a270b50c-02d1-42a0-9165-92d78b3ce400" />
+
