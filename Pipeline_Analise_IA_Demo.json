@@ -1,0 +1,1047 @@
+{
+  "name": "Pipeline de Análise com IA_Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "exemplo@empresa.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        80
+      ],
+      "id": "abf775c8-24c0-4db7-99a9-a60fbda0edc0",
+      "name": "EmailRecebido"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e3ce92b-b999-4722-af74-aed4075a2edb",
+              "name": "nome",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "06fe700d-622e-4676-b42c-9eadf4d9dfe4",
+              "name": "email",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "26d32c5b-cd1d-49a1-8119-a0cf3b972a4a",
+              "name": "assunto",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "cedd3cec-8103-445e-9c6a-f48691491811",
+              "name": "texto",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        80
+      ],
+      "id": "df47a438-e0bb-4019-9475-487f26099126",
+      "name": "Dados"
+    },
+    {
+      "parameters": {
+        "text": "=Assunto:  {{ $json.assunto }}\nCliente: {{ $json.nome }} - {{ $json.email }}\n\nCorpo do Email:\n{{ $json.texto }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "nome_cliente",
+              "description": "Nome do cliente."
+            },
+            {
+              "name": "item_mencionado",
+              "description": "Produto ou serviço mencionado no e-mail, se não encontrar, use \"Não especificado\""
+            },
+            {
+              "name": "ponto_principal",
+              "description": "Principal problema, objetivo, reclamação, sugestão, ou elogio da mensagem. Em uma frase objetivo."
+            },
+            {
+              "name": "urgente",
+              "type": "boolean",
+              "description": "Indica se é uma mensagem urgente ou não",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        80
+      ],
+      "id": "bc3626c3-b370-429f-baba-d821890c8bd4",
+      "name": "ExtrairDados"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "70d0fe11-811b-49c1-b064-ede5d2c11511",
+              "leftValue": "={{ $json.output.urgente }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        800,
+        80
+      ],
+      "id": "6ae18b8d-f778-4399-89c5-6529d9d575ad",
+      "name": "Urgente?"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "ID_DO_USUARIO_SLACK",
+          "mode": "list",
+          "cachedResultName": "Usuario Exemplo"
+        },
+        "text": "=🚨 *FEEDBACK URGENTE RECEBIDO* 🚨\n\nCliente: {{ $json.output.nome_cliente }}\nItem Mencionado: {{ $json.output.item_mencionado }}\n\nPonto Principal: \n{{ $json.output.ponto_principal }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1088,
+        -32
+      ],
+      "id": "c1f2b6e4-a1c5-4e03-a62a-5f2b80a786ed",
+      "name": "EnviarUrgencia"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Dados').item.json.texto }}",
+        "options": {
+          "categories": "Positivo, Neutro, Negativo",
+          "includeDetailedResults": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "183c0a57-3003-460e-8fc9-74f19ef1b381",
+      "name": "AnalisarSentimento"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Dados').item.json.texto }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Bug",
+              "description": "Problemas Técnicos"
+            },
+            {
+              "category": "Reclamação",
+              "description": "Insatisfação geral."
+            },
+            {
+              "category": "Sugestão",
+              "description": "Ideias de melhorias."
+            },
+            {
+              "category": "Elogio",
+              "description": "Feedback positivo."
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "c823d212-5bea-4e81-ad7d-1e4d8d84085c",
+      "name": "CategorizarFeedback"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "ID_DO_CANAL_SLACK",
+          "mode": "list",
+          "cachedResultName": "canal-bugs"
+        },
+        "text": "=🐛 *Novo Bug Reportado*\n\n*Cliente:* {{ $('ExtrairDados').item.json.output.nome_cliente }}\n*Produto:* {{ $('ExtrairDados').item.json.output.item_mencionado }}\n\n*Problema:*\n{{ $('ExtrairDados').item.json.output.ponto_principal }}\n\nAlguém consegue investigar?",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1952,
+        -208
+      ],
+      "id": "a6cf8294-5461-4d3f-a941-3412225f91cd",
+      "name": "EnviarBug"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1bcb548-078d-4574-bc41-965a3674f6a1",
+              "name": "categoria",
+              "value": "bug",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2176,
+        -208
+      ],
+      "id": "4b7915cd-c095-4665-8438-906d2b1ce95a",
+      "name": "CategoriaBug"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1bcb548-078d-4574-bc41-965a3674f6a1",
+              "name": "categoria",
+              "value": "reclamacao",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2176,
+        -16
+      ],
+      "id": "c38d56ca-08c1-4fb5-b03d-c96f58c639c8",
+      "name": "CategoriaReclamacao"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('EmailRecebido').item.json.id }}",
+        "message": "=<p>Olá <b>{{ $('ExtrairDados').item.json.output.nome_cliente }}</b>,</p>\n\n<p>Recebemos o seu comentário sobre o produto <b>{{ $('ExtrairDados').item.json.output.item_mencionado }}\n</b> e agradecemos sinceramente por partilhar connosco a sua experiência.</p>\n\n<p>Lamentamos que o produto não tenha correspondido às suas expetativas.</p>\n\n<p>Com os melhores cumprimentos,<br>\n<b>Equipe [Sua Empresa]</b></p>",
+        "options": {
+          "senderName": "Equipe [Sua Empresa]"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        -16
+      ],
+      "id": "a760b9d8-e992-445c-8c4a-4ddb6e7dd4e2",
+      "name": "ResponderAutomaticamente"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "ID_DO_CANAL_SLACK",
+          "mode": "list",
+          "cachedResultName": "canal-reclamacoes"
+        },
+        "text": "=ℹ️ Nova Notificação de Cliente\n\n👤 Cliente: {{ $('ExtrairDados').item.json.output.nome_cliente }}\n📝 Resumo do Contacto:\n{{ $('ExtrairDados').item.json.output.ponto_principal }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1728,
+        -16
+      ],
+      "id": "9fb923d3-a760-4f6d-a836-1fcb08fe98b2",
+      "name": "EnviarReclamacao"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "ID_DO_CANAL_SLACK",
+          "mode": "list",
+          "cachedResultName": "canal-sugestoes"
+        },
+        "text": "=💡 *Nova Sugestão de Cliente*\n\n*Sugestão enviada:*\n> {{ $('ExtrairDados').item.json.output.ponto_principal }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1952,
+        176
+      ],
+      "id": "c7bef6d2-89aa-4b6a-b8ec-b6478b7daf7a",
+      "name": "EnviarSugestao"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1bcb548-078d-4574-bc41-965a3674f6a1",
+              "name": "categoria",
+              "value": "sugestao",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2176,
+        176
+      ],
+      "id": "df14b065-bbe2-4896-b0bd-793a0d45b844",
+      "name": "CategoriaSugestao"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1728,
+        976
+      ],
+      "id": "6a781cdb-9596-47d4-9ffa-f07c1b11caef",
+      "name": "Gemini"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('EmailRecebido').item.json.id }}",
+        "message": "=<p>Olá, {{ $('ExtrairDados').item.json.output.nome_cliente }}!</p>\n\n<p>Ficamos super felizes em ler o seu feedback sobre <b>{{ $('ExtrairDados').item.json.output.item_mencionado }}</b>! 🙌</p>\n\n<p>Muito obrigado pelo carinho,<br><b>Equipe [Sua Empresa]</b></p>",
+        "options": {
+          "senderName": "Equipe [Sua Empresa]"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        368
+      ],
+      "id": "823d5a49-ff17-41b6-b4e2-9d746011f648",
+      "name": "ResponderAutomaticamente1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "ID_DO_CANAL_SLACK",
+          "mode": "list",
+          "cachedResultName": "canal-elogios"
+        },
+        "text": "=🎉 Uau! Recebemos um novo elogio!🎉\n\n💬 O que disseram:\n\"{{ $('ExtrairDados').item.json.output.ponto_principal }}\"",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1728,
+        368
+      ],
+      "id": "b9aba2cc-633a-4bbb-8c24-b9e6ff478600",
+      "name": "EnviarElogio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1bcb548-078d-4574-bc41-965a3674f6a1",
+              "name": "categoria",
+              "value": "elogio",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2176,
+        368
+      ],
+      "id": "5773d827-8558-4624-860f-ed29b77d658d",
+      "name": "CategoriaElogio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1bcb548-078d-4574-bc41-965a3674f6a1",
+              "name": "categoria",
+              "value": "outro",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2176,
+        560
+      ],
+      "id": "98b4069b-2ee1-4349-b857-480893fa745d",
+      "name": "CategoriaOutro"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "ID_DO_USUARIO_SLACK",
+          "mode": "list",
+          "cachedResultName": "Usuario Exemplo"
+        },
+        "text": "=💡 Nova Mensagem de Cliente*\n\n> {{ $('ExtrairDados').item.json.output.ponto_principal }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        1952,
+        560
+      ],
+      "id": "bc20c7cc-39e7-4da9-b9be-244b4d811259",
+      "name": "Fallback"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b121532-ce9e-4e69-936a-f74a383bb77d",
+              "name": "output.nome_cliente",
+              "value": "={{ $('ExtrairDados').item.json.output.nome_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "c011498a-05aa-4b3a-b5f0-748b7531f8ad",
+              "name": "item_mencionado",
+              "value": "={{ $('ExtrairDados').item.json.output.item_mencionado }}",
+              "type": "string"
+            },
+            {
+              "id": "5ca92ee6-7086-4eeb-8c9f-9d9c71dd3056",
+              "name": "ponto_principal",
+              "value": "={{ $('ExtrairDados').item.json.output.ponto_principal }}",
+              "type": "string"
+            },
+            {
+              "id": "04e6cebb-8f8a-4d42-a762-89cc31c9419c",
+              "name": "urgencia",
+              "value": "={{ $('ExtrairDados').item.json.output.urgente }}",
+              "type": "boolean"
+            },
+            {
+              "id": "4ff73801-d4bd-4051-b51c-ea173bd87a76",
+              "name": "sentimento",
+              "value": "={{ $('AnalisarSentimento').item.json.sentimentAnalysis.category }}",
+              "type": "string"
+            },
+            {
+              "id": "da2e5dbd-02aa-488a-b450-86444e81ff07",
+              "name": "categoria",
+              "value": "={{ $('AnalisarSentimento').item.json.sentimentAnalysis.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2400,
+        288
+      ],
+      "id": "f3e7d809-2514-4641-81c6-4650d6062a4d",
+      "name": "DadosFinais"
+    },
+    {
+      "parameters": {
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "summarizationMethod": "stuff",
+              "prompt": "Escreva um resumo conciso.\n\n\"{texto}\""
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        2624,
+        288
+      ],
+      "id": "230c8135-7253-4343-9e91-bea7420d74fd",
+      "name": "ResumirFeedback"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "ID_DA_PLANILHA",
+          "mode": "list",
+          "cachedResultName": "Planilha_Demonstracao"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "NOME_DA_ABA",
+          "mode": "list",
+          "cachedResultName": "feedbacks"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cliente": "={{ $('DadosFinais').item.json.output.nome_cliente }}",
+            "problema": "={{ $('DadosFinais').item.json.ponto_principal }}",
+            "sentimento": "={{ $('DadosFinais').item.json.sentimento }}",
+            "categoria": "={{ $('DadosFinais').item.json.categoria }}",
+            "resumo": "={{ $json.output }}",
+            "data": "={{ $today.format('dd/MM/yyyy')}}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2992,
+        288
+      ],
+      "id": "ec0abc1e-30b6-4c7f-8846-339f347066cf",
+      "name": "RegistrarFeedback"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        704
+      ],
+      "id": "f8767667-7ef3-44d1-89ba-33c7707b0a0f",
+      "name": "AgendarExecucao"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "ID_DA_PLANILHA",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "NOME_DA_ABA",
+          "mode": "list",
+          "cachedResultName": "feedbacks"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "data",
+              "lookupValue": "={{ $today.format('dd/MM/yyyy') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        704
+      ],
+      "id": "6ba755c5-bdc5-4083-b6bd-465dbbede2f0",
+      "name": "LerFeedbacks"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Resumo dos feedbacks de hoje:\n\n{{ JSON.stringify($input.all(), null, 2) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "=SystemMessagePromptTemplate",
+              "message": "Assume o papel de um analista. Gere um briefing executivo genérico em formato HTML com base nos feedbacks de hoje para fins de demonstração."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        912,
+        704
+      ],
+      "id": "da8406f1-2ede-47fd-9a3b-fb8d3cf65c4a",
+      "name": "GerarResumo"
+    },
+    {
+      "parameters": {
+        "sendTo": "exemplo@empresa.com",
+        "subject": "Relatório Diário de Feedbacks",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Central de Feedback Exemplo"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        704
+      ],
+      "id": "713273ce-38b2-432e-9341-aabc83a61597",
+      "name": "Send a message"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "EmailRecebido": {
+      "main": [
+        [
+          {
+            "node": "Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados": {
+      "main": [
+        [
+          {
+            "node": "ExtrairDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtrairDados": {
+      "main": [
+        [
+          {
+            "node": "Urgente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Urgente?": {
+      "main": [
+        [
+          {
+            "node": "EnviarUrgencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AnalisarSentimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AnalisarSentimento": {
+      "main": [
+        [
+          {
+            "node": "CategorizarFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CategorizarFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CategorizarFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategorizarFeedback": {
+      "main": [
+        [
+          {
+            "node": "EnviarBug",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "EnviarReclamacao",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "EnviarSugestao",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "EnviarElogio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnviarBug": {
+      "main": [
+        [
+          {
+            "node": "CategoriaBug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ResponderAutomaticamente": {
+      "main": [
+        [
+          {
+            "node": "CategoriaReclamacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnviarReclamacao": {
+      "main": [
+        [
+          {
+            "node": "ResponderAutomaticamente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnviarSugestao": {
+      "main": [
+        [
+          {
+            "node": "CategoriaSugestao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ExtrairDados",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AnalisarSentimento",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "CategorizarFeedback",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "ResumirFeedback",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "GerarResumo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ResponderAutomaticamente1": {
+      "main": [
+        [
+          {
+            "node": "CategoriaElogio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnviarElogio": {
+      "main": [
+        [
+          {
+            "node": "ResponderAutomaticamente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback": {
+      "main": [
+        [
+          {
+            "node": "CategoriaOutro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategoriaOutro": {
+      "main": [
+        [
+          {
+            "node": "DadosFinais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategoriaElogio": {
+      "main": [
+        [
+          {
+            "node": "DadosFinais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategoriaSugestao": {
+      "main": [
+        [
+          {
+            "node": "DadosFinais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategoriaReclamacao": {
+      "main": [
+        [
+          {
+            "node": "DadosFinais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CategoriaBug": {
+      "main": [
+        [
+          {
+            "node": "DadosFinais",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DadosFinais": {
+      "main": [
+        [
+          {
+            "node": "ResumirFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ResumirFeedback": {
+      "main": [
+        [
+          {
+            "node": "RegistrarFeedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AgendarExecucao": {
+      "main": [
+        [
+          {
+            "node": "LerFeedbacks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LerFeedbacks": {
+      "main": [
+        [
+          {
+            "node": "GerarResumo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GerarResumo": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  }
+}
